@@ -1,0 +1,68 @@
+------Marketing-Customer-Value-Analysis
+----NGUYỄN NGỌC HUY - K296 Online
+
+--Show data
+SELECT count(*)  
+FROM `DA04_K296.marketing_customer`;
+
+# LOGISTIC MODEL
+CREATE OR REPLACE MODEL `DA04_K296.marketing_customer_logistic_model`
+OPTIONS(model_type='LOGISTIC_REG',
+    auto_class_weights=TRUE,
+    input_label_cols=['Response']
+  ) AS
+SELECT  
+  *
+  EXCEPT(Education, Customer, Gender)
+FROM
+    `DA04_K296.marketing_customer`;
+
+-- EVALUATE LOGISTIC
+SELECT
+  *
+FROM
+  ML.EVALUATE(MODEL `DA04_K296.marketing_customer_logistic_model`);
+
+-- BOOSTED TREE MODEL
+CREATE OR REPLACE MODEL `DA04_K296.marketing_customer_boostedtree_classifier_model`
+OPTIONS(model_type='BOOSTED_TREE_CLASSIFIER',
+        -- NUM_PARALLEL_TREE = 2,
+        -- BOOSTER_TYPE = 'GBTREE',
+        -- EARLY_STOP = TRUE,       
+        INPUT_LABEL_COLS = ['Response']
+  ) AS
+SELECT  
+  *
+  EXCEPT(Education, Customer, Gender)
+FROM
+    `DA04_K296.marketing_customer`;
+
+-- EVALUATION BOOSTED TREE
+SELECT *
+FROM ML.EVALUATE(MODEL `DA04_K296.marketing_customer_boostedtree_classifier_model`);
+SELECT *
+FROM ML.CONFUSION_MATRIX(MODEL `DA04_K296.marketing_customer_boostedtree_classifier_model`);
+SELECT *
+FROM ML.ROC_CURVE(MODEL `DA04_K296.marketing_customer_boostedtree_classifier_model`);
+
+-- RANDOM FOREST MODEL
+CREATE OR REPLACE MODEL `DA04_K296.marketing_customer_randomforest_classifier_model`
+OPTIONS(model_type='RANDOM_FOREST_CLASSIFIER',
+        -- NUM_PARALLEL_TREE = 50,
+        INPUT_LABEL_COLS = ['Response']
+  ) AS
+SELECT  
+  *
+  EXCEPT(Education, Customer, Gender)
+FROM
+    `DA04_K296.marketing_customer`;
+
+-- EVALUATION RANDOM FOREST
+SELECT *
+FROM ML.EVALUATE(MODEL `DA04_K296.marketing_customer_randomforest_classifier_model`);
+SELECT *
+FROM ML.CONFUSION_MATRIX(MODEL `DA04_K296.marketing_customer_randomforest_classifier_model`);
+SELECT *
+FROM ML.ROC_CURVE(MODEL `DA04_K296.marketing_customer_randomforest_classifier_model`);
+
+
